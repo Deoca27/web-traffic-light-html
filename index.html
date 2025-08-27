@@ -5,81 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Traffic Light Control</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: linear-gradient(to bottom right, #f3f4f6, #e5e7eb);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    h1 {
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 16px;
-      color: #1f2937;
-      text-shadow: 0 2px 2px rgba(0,0,0,0.1);
-    }
-    .status {
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-weight: 600;
-      color: white;
-      margin-bottom: 10px;
-    }
-    .lamp-box {
-      width: 90px;
-      padding: 20px;
-      background: #1f2937;
-      border-radius: 25px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    .lamp {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: #d1d5db; /* default abu-abu */
-      transition: all 0.4s ease;
-    }
-    .controls {
-      display: flex;
-      gap: 20px;
-      margin-top: 24px;
-    }
-    .btn {
-      padding: 12px 24px;
-      font-weight: bold;
-      border: none;
-      border-radius: 12px;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: background 0.2s ease;
-    }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .btn-on { background: #22c55e; }
-    .btn-on:hover { background: #16a34a; }
-    .btn-off { background: #ef4444; }
-    .btn-off:hover { background: #dc2626; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>Traffic Light Control</h1>
 
   <!-- Status Broker -->
-  <div id="brokerStatus" class="status" style="background:#6b7280">Broker: Disconnected</div>
+  <div id="brokerStatus" class="status">Broker: Disconnected</div>
   <!-- Status ESP32 -->
-  <div id="espStatus" class="status" style="background:#6b7280">ESP32: Unknown</div>
+  <div id="espStatus" class="status">ESP32: Unknown</div>
 
   <!-- Traffic Light -->
   <div class="lamp-box">
@@ -89,9 +23,7 @@
   </div>
 
   <!-- Status Lampu -->
-  <div id="lampText" style="margin-top:16px;font-size:18px;font-weight:600;color:#374151;">
-    Mati
-  </div>
+  <div id="lampText" class="lamp-text">Mati</div>
 
   <!-- Tombol Kontrol -->
   <div class="controls">
@@ -99,96 +31,6 @@
     <button id="btnOff" class="btn btn-off">OFF</button>
   </div>
 
-  <script>
-    let lampStatus = "Mati";
-    let espStatus = "Unknown";
-    let connectionStatus = "Disconnected";
-
-    const brokerStatusEl = document.getElementById("brokerStatus");
-    const espStatusEl = document.getElementById("espStatus");
-    const lampTextEl = document.getElementById("lampText");
-    const lampMerah = document.getElementById("lampMerah");
-    const lampKuning = document.getElementById("lampKuning");
-    const lampHijau = document.getElementById("lampHijau");
-    const btnOn = document.getElementById("btnOn");
-    const btnOff = document.getElementById("btnOff");
-
-    function updateLamps() {
-      lampMerah.style.background = lampStatus.includes("Merah") ? "#ef4444" : "#d1d5db";
-      lampKuning.style.background = lampStatus.includes("Kuning") ? "#facc15" : "#d1d5db";
-      lampHijau.style.background = lampStatus.includes("Hijau") ? "#22c55e" : "#d1d5db";
-      lampTextEl.textContent = lampStatus;
-    }
-
-    function updateStatus() {
-      brokerStatusEl.textContent = "Broker: " + connectionStatus;
-      if (connectionStatus === "Connected") brokerStatusEl.style.background = "#22c55e";
-      else if (connectionStatus === "Disconnected") brokerStatusEl.style.background = "#6b7280";
-      else if (connectionStatus === "Error") brokerStatusEl.style.background = "#ef4444";
-      else brokerStatusEl.style.background = "#facc15";
-
-      espStatusEl.textContent = "ESP32: " + espStatus;
-      if (espStatus === "ONLINE") espStatusEl.style.background = "#16a34a";
-      else if (espStatus === "OFFLINE") espStatusEl.style.background = "#dc2626";
-      else espStatusEl.style.background = "#6b7280";
-
-      // enable/disable tombol
-      const allow = (connectionStatus === "Connected" || connectionStatus === "....") && espStatus === "ONLINE";
-      btnOn.disabled = !allow;
-      btnOff.disabled = !allow;
-    }
-
-    // MQTT connect
-    const client = mqtt.connect("wss://test.mosquitto.org:8081");
-
-    client.on("connect", () => {
-      connectionStatus = "Connected";
-      updateStatus();
-      client.subscribe("trafficlight/status");
-    });
-
-    client.on("reconnect", () => {
-      connectionStatus = "Reconnecting";
-      updateStatus();
-    });
-
-    client.on("offline", () => {
-      connectionStatus = "Disconnected";
-      updateStatus();
-    });
-
-    client.on("close", () => {
-      connectionStatus = "....";
-      updateStatus();
-    });
-
-    client.on("error", (err) => {
-      console.error("MQTT error:", err);
-      connectionStatus = "Error";
-      updateStatus();
-    });
-
-    client.on("message", (topic, message) => {
-      if (topic === "trafficlight/status") {
-        const msg = message.toString();
-        if (msg === "ONLINE") {
-          espStatus = "ONLINE";
-        } else if (msg === "OFFLINE") {
-          espStatus = "OFFLINE";
-          lampStatus = "Mati";
-        } else {
-          lampStatus = msg;
-        }
-        updateLamps();
-        updateStatus();
-      }
-    });
-
-    btnOn.onclick = () => client.publish("trafficlight/control", "ON");
-    btnOff.onclick = () => client.publish("trafficlight/control", "OFF");
-
-    updateLamps();
-    updateStatus();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>

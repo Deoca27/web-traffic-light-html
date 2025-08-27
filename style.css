@@ -1,0 +1,95 @@
+body {
+  font-family: sans-serif;
+  background: linear-gradient(to bottom right, #f3f4f6, #e5e7eb);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #1f2937;
+  text-shadow: 0 2px 2px rgba(0,0,0,0.1);
+}
+
+.status {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 10px;
+  background: #6b7280;
+  transition: background 0.2s;
+}
+
+.lamp-box {
+  width: 90px;
+  padding: 20px;
+  background: #1f2937;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.lamp {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #d1d5db;
+  transition: all 0.4s ease;
+}
+
+.lamp-text {
+  margin-top:16px;
+  font-size:18px;
+  font-weight:600;
+  color:#374151;
+}
+
+.controls {
+  display: flex;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.btn {
+  padding: 12px 24px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-on { background: #22c55e; }
+.btn-on:hover { background: #16a34a; }
+
+.btn-off { background: #ef4444; }
+.btn-off:hover { background: #dc2626; }
+
+/* efek ditekan */
+@keyframes click-bounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.9); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.animate-click {
+  animation: click-bounce 0.3s ease;
+}
