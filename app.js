@@ -57,13 +57,18 @@ client.on("message", (topic, message) => {
   }
 });
 
-// tombol kontrol + animasi klik
+// tombol kontrol + animasi klik (desktop + mobile)
 function addClickAnimation(button, action){
-  button.addEventListener("click", () => {
+  const trigger = (event) => {
+    event.preventDefault(); // penting untuk touch di HP
+    if(button.disabled) return;
     button.classList.add("animate-click");
     setTimeout(() => button.classList.remove("animate-click"), 300);
     action();
-  });
+  }
+
+  button.addEventListener("click", trigger);
+  button.addEventListener("touchstart", trigger); // tambahan agar mobile juga jalan
 }
 
 addClickAnimation(btnOn, () => client.publish("trafficlight/control", "ON"));
